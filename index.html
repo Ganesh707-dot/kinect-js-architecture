@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How JavaScript Powers an AI-Native Conversational Commerce Platform</title>
+<script type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: "base",
+    themeVariables: {
+      primaryColor: "#f8fafc",
+      primaryTextColor: "#0f172a",
+      primaryBorderColor: "#e2e8f0",
+      secondaryColor: "#ecfdf5",
+      tertiaryColor: "#ffffff",
+      lineColor: "#94a3b8",
+      fontFamily: "ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif",
+      fontSize: "12.5px"
+    },
+    flowchart: {
+      curve: "basis",
+      padding: 10,
+      nodeSpacing: 20,
+      rankSpacing: 26,
+      htmlLabels: true,
+      useMaxWidth: true
+    },
+    securityLevel: "loose"
+  });
+</script>
+<style>
+  :root {
+    --bg: #ffffff;
+    --ink: #0b1220;
+    --muted: #64748b;
+    --line: #e8eef5;
+    --soft: #f8fafc;
+    --teal: #0f766e;
+    --teal-soft: #f0fdfa;
+    --blue: #2563eb;
+    --shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 12px 32px rgba(15, 23, 42, 0.06);
+    --shadow-hover: 0 2px 6px rgba(15, 23, 42, 0.06), 0 18px 40px rgba(15, 23, 42, 0.08);
+    --radius: 16px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    background:
+      radial-gradient(1000px 420px at 8% -14%, rgba(15, 118, 110, 0.08), transparent 55%),
+      radial-gradient(800px 380px at 96% 0%, rgba(37, 99, 235, 0.05), transparent 52%),
+      var(--bg);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .sticky {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    background: rgba(255, 255, 255, 0.88);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .sticky-inner {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    font-weight: 650;
+    letter-spacing: -0.01em;
+  }
+
+  .mark {
+    width: 28px;
+    height: 28px;
+    border-radius: 9px;
+    background: linear-gradient(135deg, #0f766e, #2563eb);
+    display: grid;
+    place-items: center;
+    box-shadow: 0 4px 12px rgba(15, 118, 110, 0.25);
+  }
+
+  .chip {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    background: var(--soft);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 6px 11px;
+  }
+
+  .page {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 40px 24px 56px;
+  }
+
+  .hero {
+    margin-bottom: 28px;
+    animation: fadeUp 0.55s ease both;
+  }
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--teal);
+    background: rgba(15, 118, 110, 0.08);
+    border: 1px solid rgba(15, 118, 110, 0.14);
+    border-radius: 999px;
+    padding: 6px 10px;
+    margin-bottom: 14px;
+  }
+
+  h1 {
+    font-size: clamp(26px, 4vw, 36px);
+    letter-spacing: -0.038em;
+    line-height: 1.1;
+    font-weight: 750;
+    max-width: 16ch;
+    margin-bottom: 8px;
+  }
+
+  .subtitle {
+    font-size: 16px;
+    color: var(--muted);
+    font-weight: 500;
+    margin-bottom: 6px;
+  }
+
+  .author {
+    font-size: 13.5px;
+    font-weight: 650;
+    color: #334155;
+    margin-bottom: 14px;
+  }
+
+  .disclaimer {
+    max-width: 70ch;
+    font-size: 12.5px;
+    color: var(--muted);
+    background: var(--soft);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--teal);
+    border-radius: 12px;
+    padding: 11px 13px;
+  }
+
+  .story {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 20px 0 24px;
+    animation: fadeUp 0.55s ease 0.08s both;
+  }
+
+  .story span {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 650;
+    color: #1e293b;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 8px 12px;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+  }
+
+  .story .arrow {
+    color: var(--muted);
+    font-weight: 400;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    padding: 0 2px;
+  }
+
+  .story .accent {
+    color: var(--teal);
+    border-color: #99f6e4;
+    background: var(--teal-soft);
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 1.55fr 0.9fr;
+    gap: 14px;
+    margin-bottom: 16px;
+    animation: fadeUp 0.55s ease 0.14s both;
+  }
+
+  .card {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+  }
+
+  .card:hover {
+    box-shadow: var(--shadow-hover);
+  }
+
+  .card.hero-card {
+    border-color: #99f6e4;
+    box-shadow: 0 1px 2px rgba(15, 118, 110, 0.05), 0 16px 40px rgba(15, 118, 110, 0.08);
+  }
+
+  .card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 13px 15px;
+    border-bottom: 1px solid var(--line);
+    background: linear-gradient(180deg, #fff, var(--soft));
+  }
+
+  .hero-card .card-head {
+    background: linear-gradient(180deg, #fff, var(--teal-soft));
+  }
+
+  .card-head h2 {
+    font-size: 11.5px;
+    font-weight: 750;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #334155;
+  }
+
+  .pill {
+    font-size: 10.5px;
+    font-weight: 700;
+    color: #1e40af;
+    background: #eff6ff;
+    border: 1px solid #dbeafe;
+    border-radius: 999px;
+    padding: 3px 8px;
+    white-space: nowrap;
+  }
+
+  .pill.runtime {
+    color: var(--teal);
+    background: var(--teal-soft);
+    border-color: #99f6e4;
+  }
+
+  .pill.async {
+    color: #92400e;
+    background: #fffbeb;
+    border-color: #fde68a;
+  }
+
+  .card-body {
+    padding: 8px 6px 12px;
+    overflow-x: auto;
+  }
+
+  .mermaid {
+    display: flex;
+    justify-content: center;
+  }
+
+  .foundations {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin: 18px 0;
+    animation: fadeUp 0.55s ease 0.2s both;
+  }
+
+  .foundation {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 15px;
+    box-shadow: var(--shadow);
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+  }
+
+  .foundation:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-hover);
+    border-color: #cbd5e1;
+  }
+
+  .foundation .icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 9px;
+    background: var(--teal-soft);
+    border: 1px solid #99f6e4;
+    display: grid;
+    place-items: center;
+    color: var(--teal);
+    margin-bottom: 10px;
+  }
+
+  .foundation h3 {
+    font-size: 13px;
+    font-weight: 750;
+    letter-spacing: -0.01em;
+    margin-bottom: 6px;
+  }
+
+  .foundation p {
+    font-size: 12.5px;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+
+  .philosophy {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 18px 20px;
+    margin-bottom: 28px;
+    animation: fadeUp 0.55s ease 0.26s both;
+  }
+
+  .philosophy h2 {
+    font-size: 15px;
+    font-weight: 750;
+    letter-spacing: -0.01em;
+    margin-bottom: 12px;
+  }
+
+  .philosophy ul {
+    list-style: none;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 9px 20px;
+  }
+
+  .philosophy li {
+    position: relative;
+    padding-left: 16px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #334155;
+  }
+
+  .philosophy li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.55em;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--teal);
+  }
+
+  .closing {
+    text-align: center;
+    padding-top: 8px;
+    animation: fadeUp 0.55s ease 0.32s both;
+  }
+
+  .quote {
+    display: inline-block;
+    max-width: 42ch;
+    font-size: clamp(17px, 2.3vw, 21px);
+    font-weight: 750;
+    letter-spacing: -0.028em;
+    line-height: 1.35;
+    color: var(--ink);
+    background: linear-gradient(180deg, #fff, var(--teal-soft));
+    border: 1px solid #99f6e4;
+    border-radius: 16px;
+    padding: 18px 22px;
+    box-shadow: var(--shadow);
+  }
+
+  .prepared {
+    margin-top: 14px;
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 500;
+  }
+
+  .prepared strong {
+    display: block;
+    margin-top: 3px;
+    color: #1e293b;
+    font-size: 14px;
+  }
+
+  @keyframes fadeUp {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (max-width: 920px) {
+    .layout { grid-template-columns: 1fr; }
+    .foundations { grid-template-columns: 1fr 1fr; }
+    .philosophy ul { grid-template-columns: 1fr; }
+    h1 { max-width: none; }
+  }
+
+  @media (max-width: 560px) {
+    .foundations { grid-template-columns: 1fr; }
+    .page { padding: 28px 16px 48px; }
+    .sticky-inner { padding: 12px 16px; }
+    .story .arrow { display: none; }
+  }
+</style>
+</head>
+<body>
+  <header class="sticky">
+    <div class="sticky-inner">
+      <div class="brand">
+        <span class="mark" aria-hidden="true">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><path d="M12 3v18M3 12h18"/></svg>
+        </span>
+        JS-First Commerce Architecture
+      </div>
+      <div class="chip">Ganesh V</div>
+    </div>
+  </header>
+
+  <main class="page">
+    <section class="hero">
+      <div class="eyebrow">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l2.5 1.5"/></svg>
+        Engineering Proposal
+      </div>
+      <h1>How JavaScript Powers an AI-Native Conversational Commerce Platform</h1>
+      <p class="subtitle">A JavaScript-First Engineering Perspective</p>
+      <p class="author">Ganesh V</p>
+      <p class="disclaimer">This architecture represents my personal engineering thinking based on publicly available information and modern engineering practices. It is not intended to represent any company's internal implementation.</p>
+    </section>
+
+    <div class="story" aria-label="Architecture story">
+      <span>Customer Intent</span>
+      <span class="arrow" aria-hidden="true">→</span>
+      <span class="accent">JavaScript Runtime</span>
+      <span class="arrow" aria-hidden="true">→</span>
+      <span>AI Orchestration</span>
+      <span class="arrow" aria-hidden="true">→</span>
+      <span>Merchant Growth</span>
+    </div>
+
+    <div class="layout">
+      <section class="card hero-card" aria-label="Main conversation architecture">
+        <div class="card-head">
+          <h2>Conversation Architecture</h2>
+          <span class="pill runtime">JavaScript Runtime · Backbone</span>
+        </div>
+        <div class="card-body">
+          <pre class="mermaid">
+flowchart TB
+  CI([Customer Intent]) --> RX["React + TypeScript Experience<br/>AI Chat · Search · Product Discovery<br/>Recommendations · Cart · Checkout"]
+  RX --> FT["fetch()"]
+  FT --> RT[["Node.js JavaScript Runtime"]]
+  RT --> EC[Execution Context]
+  EC --> CS[Call Stack]
+  CS --> AA[Async / Await]
+  AA --> PA["Promise.all()"]
+  PA --> PP["Parallel Services"]
+  PP --> RC[(Redis Cache)]
+  PP --> PS[Product Service]
+  PP --> CH[Conversation History]
+  PP --> BR[Business Rules]
+  RC --> CB[Context Builder]
+  PS --> CB
+  CH --> CB
+  BR --> CB
+  CB --> PB[Prompt Builder]
+  PB --> LLM[LLM]
+  LLM --> ST[Streaming Tokens]
+  ST --> EL[Event Loop]
+  EL --> UI[React Streaming UI Updates]
+  UI --> CD([Customer Decision])
+  CD --> AN[Analytics]
+  AN --> MI[Merchant Insights]
+  MI --> RO[Recommendation Optimization]
+
+  classDef runtime fill:#ecfdf5,stroke:#0f766e,stroke-width:2px,color:#0f172a
+  classDef parallel fill:#eff6ff,stroke:#2563eb,color:#0f172a
+  classDef endnode fill:#f8fafc,stroke:#94a3b8,color:#0f172a
+  class RT,EC,CS,AA,PA,EL runtime
+  class PP,RC,PS,CH,BR parallel
+  class CI,CD,RO endnode
+          </pre>
+        </div>
+      </section>
+
+      <aside class="card" aria-label="Background processing">
+        <div class="card-head">
+          <h2>Background Processing</h2>
+          <span class="pill async">Async</span>
+        </div>
+        <div class="card-body">
+          <pre class="mermaid">
+flowchart TB
+  A[Shopify Product Changes] --> B[Shopify Webhooks]
+  B --> C[RabbitMQ]
+  C --> D[ETL]
+  D --> E[Embeddings]
+  E --> F[(Vector Database)]
+  F --> G[Redis Refresh]
+  G --> H[Recommendation Engine Updated]
+
+  classDef async fill:#fffbeb,stroke:#d97706,color:#0f172a
+  class A,B,C,D,E,F,G,H async
+          </pre>
+        </div>
+      </aside>
+    </div>
+
+    <section class="foundations" aria-label="JavaScript foundations">
+      <article class="foundation">
+        <div class="icon" aria-hidden="true">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        </div>
+        <h3>Execution Context</h3>
+        <p>Creates isolated state for every customer request.</p>
+      </article>
+      <article class="foundation">
+        <div class="icon" aria-hidden="true">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v18M8 7l4-4 4 4M8 17l4 4 4-4"/></svg>
+        </div>
+        <h3>Call Stack</h3>
+        <p>Executes business logic in predictable order.</p>
+      </article>
+      <article class="foundation">
+        <div class="icon" aria-hidden="true">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="6" cy="12" r="3"/><circle cx="18" cy="6" r="3"/><circle cx="18" cy="18" r="3"/><path d="M8.5 10.5l5-3M8.5 13.5l5 3"/></svg>
+        </div>
+        <h3>Async + Promises</h3>
+        <p>Runs multiple services concurrently without blocking.</p>
+      </article>
+      <article class="foundation">
+        <div class="icon" aria-hidden="true">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 3v6h-6"/></svg>
+        </div>
+        <h3>Event Loop</h3>
+        <p>Keeps AI conversations responsive while external services process requests.</p>
+      </article>
+    </section>
+
+    <section class="philosophy">
+      <h2>Engineering Philosophy</h2>
+      <ul>
+        <li>Understand customer intent before writing code.</li>
+        <li>Use JavaScript to orchestrate fast, non-blocking AI workflows.</li>
+        <li>Build systems that improve merchant outcomes, not just features.</li>
+        <li>Treat AI as one component of a larger engineering architecture.</li>
+      </ul>
+    </section>
+
+    <footer class="closing">
+      <p class="quote">Business value is created by engineering decisions, not by AI models alone.</p>
+      <p class="prepared">Prepared by<strong>Ganesh V</strong></p>
+    </footer>
+  </main>
+</body>
+</html>
